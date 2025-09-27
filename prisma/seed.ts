@@ -359,19 +359,22 @@ async function main() {
       ]
 
       for (const imageData of sampleImages) {
-        await prisma.listingImage.upsert({
+        // Verificar se a imagem já existe
+        const existingImage = await prisma.listingImage.findFirst({
           where: {
-            listingId_url: {
-              listingId: listing.id,
-              url: imageData.url
-            }
-          },
-          update: {},
-          create: {
             listingId: listing.id,
-            ...imageData,
-          },
+            url: imageData.url
+          }
         })
+
+        if (!existingImage) {
+          await prisma.listingImage.create({
+            data: {
+              listingId: listing.id,
+              ...imageData,
+            },
+          })
+        }
       }
 
       console.log(`  - ${sampleImages.length} imagens adicionadas`)
