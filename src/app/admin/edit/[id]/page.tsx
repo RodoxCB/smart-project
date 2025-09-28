@@ -1,7 +1,7 @@
 "use client"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
+import { useState, useEffect } from "react"
+import { useRouter, useParams } from "next/navigation"
 import Link from "next/link"
 import { ArrowLeft, Save, Upload } from "lucide-react"
 import { AdminGuard } from "@/components/AdminGuard"
@@ -19,6 +19,7 @@ interface ListingFormData {
   capacity: string
   location: string
   whatsapp: string
+  status: string
   featured: boolean
   images: Array<{
     url: string
@@ -27,10 +28,14 @@ interface ListingFormData {
   }>
 }
 
-export default function NewListingPage() {
+export default function EditListingPage() {
   const router = useRouter()
+  const params = useParams()
+  const listingId = params.id as string
+
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [fetching, setFetching] = useState(true)
   const [formData, setFormData] = useState<ListingFormData>({
     title: "",
     description: "",
@@ -44,9 +49,52 @@ export default function NewListingPage() {
     capacity: "",
     location: "",
     whatsapp: "",
+    status: "active",
     featured: false,
     images: [],
   })
+
+  // Buscar dados do anúncio
+  useEffect(() => {
+    const fetchListing = async () => {
+      try {
+        const response = await fetch(`/api/listings/${listingId}`)
+        if (response.ok) {
+          const listing = await response.json()
+          setFormData({
+            title: listing.title || "",
+            description: listing.description || "",
+            price: listing.price?.toString() || "",
+            brand: listing.brand || "",
+            model: listing.model || "",
+            year: listing.year?.toString() || "",
+            mileage: listing.mileage?.toString() || "",
+            fuel: listing.fuel || "",
+            transmission: listing.transmission || "",
+            capacity: listing.capacity?.toString() || "",
+            location: listing.location || "",
+            whatsapp: listing.whatsapp || "",
+            status: listing.status || "active",
+            featured: listing.featured || false,
+            images: listing.images || [],
+          })
+        } else {
+          alert("Erro ao buscar dados do anúncio")
+          router.push("/admin")
+        }
+      } catch (error) {
+        console.error("Erro ao buscar anúncio:", error)
+        alert("Erro ao buscar dados do anúncio")
+        router.push("/admin")
+      } finally {
+        setFetching(false)
+      }
+    }
+
+    if (listingId) {
+      fetchListing()
+    }
+  }, [listingId, router])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target
@@ -103,8 +151,8 @@ export default function NewListingPage() {
     setLoading(true)
 
     try {
-      const response = await fetch('/api/listings', {
-        method: 'POST',
+      const response = await fetch(`/api/listings/${listingId}`, {
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -115,14 +163,24 @@ export default function NewListingPage() {
         router.push('/admin')
       } else {
         const error = await response.json()
-        alert(error.error || 'Erro ao criar anúncio')
+        alert(error.error || 'Erro ao atualizar anúncio')
       }
     } catch (error) {
-      console.error('Erro ao criar anúncio:', error)
-      alert('Erro ao criar anúncio')
+      console.error('Erro ao atualizar anúncio:', error)
+      alert('Erro ao atualizar anúncio')
     } finally {
       setLoading(false)
     }
+  }
+
+  if (fetching) {
+    return (
+      <AdminGuard>
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-500"></div>
+        </div>
+      </AdminGuard>
+    )
   }
 
   return (
@@ -140,7 +198,7 @@ export default function NewListingPage() {
                   <ArrowLeft className="h-4 w-4 mr-2" />
                   Voltar
                 </Link>
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Novo Anúncio</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Editar Anúncio</h1>
               </div>
             </div>
           </div>
@@ -361,6 +419,26 @@ export default function NewListingPage() {
               </div>
             </div>
 
+            {/* Status */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Status
+                </label>
+                <select
+                  id="status"
+                  name="status"
+                  value={formData.status}
+                  onChange={handleInputChange}
+                  className="mt-1 block w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                >
+                  <option value="active">Ativo</option>
+                  <option value="inactive">Inativo</option>
+                  <option value="sold">Vendido</option>
+                </select>
+              </div>
+            </div>
+
             {/* Configurações */}
             <div className="flex items-center">
               <input
@@ -434,7 +512,7 @@ export default function NewListingPage() {
                 className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 transition-colors"
               >
                 <Save className="h-4 w-4 mr-2" />
-                {loading ? 'Salvando...' : 'Salvar Anúncio'}
+                {loading ? 'Salvando...' : 'Atualizar Anúncio'}
               </button>
             </div>
           </form>

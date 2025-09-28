@@ -7,7 +7,10 @@ import { authOptions } from '@/lib/auth'
 export async function GET(request: NextRequest) {
   try {
     // Verificar autenticação
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession({
+      req: request,
+      ...authOptions
+    })
     if (!session?.user || session.user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Não autorizado' },
