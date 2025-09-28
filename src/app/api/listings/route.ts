@@ -13,6 +13,14 @@ export async function GET(request: NextRequest) {
     const brand = searchParams.get('brand') || ''
     const minPrice = searchParams.get('minPrice') || ''
     const maxPrice = searchParams.get('maxPrice') || ''
+    const minYear = searchParams.get('minYear') || ''
+    const maxYear = searchParams.get('maxYear') || ''
+    const minMileage = searchParams.get('minMileage') || ''
+    const maxMileage = searchParams.get('maxMileage') || ''
+    const fuel = searchParams.get('fuel') || ''
+    const transmission = searchParams.get('transmission') || ''
+    const sortBy = searchParams.get('sortBy') || 'createdAt'
+    const sortOrder = searchParams.get('sortOrder') || 'desc'
     const featured = searchParams.get('featured') === 'true'
 
     const skip = (page - 1) * limit
@@ -54,6 +62,30 @@ export async function GET(request: NextRequest) {
       where.price = { ...where.price, lte: parseFloat(maxPrice) }
     }
 
+    if (minYear) {
+      where.year = { ...where.year, gte: parseInt(minYear) }
+    }
+
+    if (maxYear) {
+      where.year = { ...where.year, lte: parseInt(maxYear) }
+    }
+
+    if (minMileage) {
+      where.mileage = { ...where.mileage, gte: parseInt(minMileage) }
+    }
+
+    if (maxMileage) {
+      where.mileage = { ...where.mileage, lte: parseInt(maxMileage) }
+    }
+
+    if (fuel) {
+      where.fuel = { contains: fuel, mode: 'insensitive' }
+    }
+
+    if (transmission) {
+      where.transmission = { contains: transmission, mode: 'insensitive' }
+    }
+
     if (featured) {
       where.featured = true
     }
@@ -69,7 +101,7 @@ export async function GET(request: NextRequest) {
         },
         orderBy: [
           { featured: 'desc' },
-          { createdAt: 'desc' },
+          { [sortBy]: sortOrder },
         ],
         skip,
         take: limit,
