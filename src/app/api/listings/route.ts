@@ -35,6 +35,10 @@ export async function GET(request: NextRequest) {
       model?: Record<string, any>
       location?: Record<string, any>
       price?: Record<string, any>
+      year?: Record<string, any>
+      mileage?: Record<string, any>
+      fuel?: Record<string, any>
+      transmission?: Record<string, any>
       featured?: boolean
     } = {
       status: 'active',
