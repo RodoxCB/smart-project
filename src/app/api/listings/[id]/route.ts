@@ -34,7 +34,10 @@ export async function GET(
     }
 
     // Se não for admin, só mostrar anúncios ativos
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession({
+      req: request,
+      ...authOptions
+    })
     if (!session?.user || session.user.role !== 'admin') {
       if (listing.status !== 'active') {
         return NextResponse.json(
@@ -61,7 +64,10 @@ export async function PUT(
 ) {
   try {
     // Verificar autenticação
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession({
+      req: request,
+      ...authOptions
+    })
     if (!session?.user || session.user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Não autorizado' },
@@ -172,7 +178,10 @@ export async function DELETE(
 ) {
   try {
     // Verificar autenticação
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession({
+      req: request,
+      ...authOptions
+    })
     if (!session?.user || session.user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Não autorizado' },

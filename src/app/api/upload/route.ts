@@ -7,7 +7,11 @@ import { authOptions } from '@/lib/auth'
 export async function POST(request: NextRequest) {
   try {
     // Verificar autenticação
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession({
+      req: request,
+      ...authOptions
+    })
+
     if (!session?.user || session.user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Não autorizado' },
@@ -76,7 +80,11 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     // Verificar autenticação
-    const session = await getServerSession(authOptions)
+    const session = await getServerSession({
+      req: request,
+      ...authOptions
+    })
+
     if (!session?.user || session.user.role !== 'admin') {
       return NextResponse.json(
         { error: 'Não autorizado' },
