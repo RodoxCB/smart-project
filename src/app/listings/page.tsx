@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Link from "next/link"
-import { Phone, MapPin, Fuel } from "lucide-react"
+import { Phone, MapPin, Fuel, ArrowLeft, Filter, X } from "lucide-react"
 
 interface Listing {
   id: string
@@ -30,6 +30,7 @@ interface Listing {
 export default function ListingsPage() {
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
+  const [showFilters, setShowFilters] = useState(false)
   const [filters, setFilters] = useState({
     search: '',
     brand: '',
@@ -40,17 +41,38 @@ export default function ListingsPage() {
 
   const fetchListings = async () => {
     try {
-      const params = new URLSearchParams()
-      if (filters.search) params.append('search', filters.search)
-      if (filters.brand) params.append('brand', filters.brand)
-      if (filters.minPrice) params.append('minPrice', filters.minPrice)
-      if (filters.maxPrice) params.append('maxPrice', filters.maxPrice)
-      if (filters.featured) params.append('featured', 'true')
+      let url = '/api/listings'
 
-      const response = await fetch(`/api/listings?${params}`)
+      // Build query params only if filters have values
+      const queryParams = []
+
+      if (filters.search && filters.search.trim()) {
+        queryParams.push(`search=${encodeURIComponent(filters.search.trim())}`)
+      }
+      if (filters.brand && filters.brand.trim()) {
+        queryParams.push(`brand=${encodeURIComponent(filters.brand.trim())}`)
+      }
+      if (filters.minPrice && filters.minPrice.trim()) {
+        queryParams.push(`minPrice=${encodeURIComponent(filters.minPrice.trim())}`)
+      }
+      if (filters.maxPrice && filters.maxPrice.trim()) {
+        queryParams.push(`maxPrice=${encodeURIComponent(filters.maxPrice.trim())}`)
+      }
+      if (filters.featured) {
+        queryParams.push('featured=true')
+      }
+
+      // Add query params if any exist
+      if (queryParams.length > 0) {
+        url += '?' + queryParams.join('&')
+      }
+
+      const response = await fetch(url)
       if (response.ok) {
         const data = await response.json()
         setListings(data.listings)
+      } else {
+        console.error('Erro na resposta da API:', response.status, response.statusText)
       }
     } catch (error) {
       console.error('Erro ao buscar anúncios:', error)
@@ -63,6 +85,12 @@ export default function ListingsPage() {
     setLoading(true)
     fetchListings()
   }, [filters])
+
+  // Load initial listings on mount
+  useEffect(() => {
+    setLoading(true)
+    fetchListings()
+  }, [])
 
   const handleFilterChange = (key: string, value: string | boolean) => {
     setFilters(prev => ({ ...prev, [key]: value }))
@@ -82,31 +110,51 @@ export default function ListingsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
       {/* Header */}
-      <header className="bg-white shadow">
+      <header className="bg-white dark:bg-slate-800 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
-            <div>
-              <Link href="/" className="text-blue-600 hover:text-blue-800">
-                ← Voltar ao início
+          <div className="flex justify-between items-center py-4 md:py-6">
+            <div className="flex items-center space-x-4">
+              <Link href="/" className="flex items-center text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300">
+                <ArrowLeft className="h-5 w-5 mr-1" />
+                <span className="hidden sm:inline">Voltar ao início</span>
               </Link>
-              <h1 className="text-3xl font-bold text-gray-900 mt-2">Anúncios de Ônibus</h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Anúncios de Ônibus</h1>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+        {/* Mobile Filter Toggle */}
+        <div className="lg:hidden mb-6">
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="w-full flex items-center justify-center px-4 py-3 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
+          >
+            <Filter className="h-5 w-5 mr-2" />
+            {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
+          </button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 md:gap-8">
           {/* Filtros */}
-          <div className="lg:col-span-1">
-            <div className="bg-white p-6 rounded-lg shadow">
-              <h3 className="text-lg font-medium text-gray-900 mb-4">Filtros</h3>
+          <div className={`lg:block ${showFilters ? 'block' : 'hidden lg:block'}`}>
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700">
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Filtros</h3>
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="lg:hidden text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
 
               {/* Busca */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Buscar
                 </label>
                 <input
@@ -114,19 +162,19 @@ export default function ListingsPage() {
                   value={filters.search}
                   onChange={(e) => handleFilterChange('search', e.target.value)}
                   placeholder="Marca, modelo, localização..."
-                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 px-3 py-2"
                 />
               </div>
 
               {/* Marca */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Marca
                 </label>
                 <select
                   value={filters.brand}
                   onChange={(e) => handleFilterChange('brand', e.target.value)}
-                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 px-3 py-2"
                 >
                   <option value="">Todas as marcas</option>
                   <option value="Mercedes-Benz">Mercedes-Benz</option>
@@ -142,7 +190,7 @@ export default function ListingsPage() {
 
               {/* Preço */}
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Preço Mínimo
                 </label>
                 <input
@@ -150,12 +198,12 @@ export default function ListingsPage() {
                   value={filters.minPrice}
                   onChange={(e) => handleFilterChange('minPrice', e.target.value)}
                   placeholder="0"
-                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 px-3 py-2"
                 />
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                   Preço Máximo
                 </label>
                 <input
@@ -163,7 +211,7 @@ export default function ListingsPage() {
                   value={filters.maxPrice}
                   onChange={(e) => handleFilterChange('maxPrice', e.target.value)}
                   placeholder="1000000"
-                  className="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 px-3 py-2"
                 />
               </div>
 
@@ -174,29 +222,29 @@ export default function ListingsPage() {
                     type="checkbox"
                     checked={filters.featured}
                     onChange={(e) => handleFilterChange('featured', e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-slate-600 rounded"
                   />
-                  <span className="ml-2 text-sm text-gray-700">Apenas destaques</span>
+                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Apenas destaques</span>
                 </label>
               </div>
             </div>
           </div>
 
           {/* Lista de Anúncios */}
-          <div className="lg:col-span-3">
+          <div className="col-span-1 lg:col-span-3">
             {loading ? (
               <div className="flex justify-center py-12">
-                <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-500"></div>
               </div>
             ) : listings.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500 text-lg">Nenhum anúncio encontrado.</p>
-                <p className="text-gray-400 mt-2">Tente ajustar os filtros de busca.</p>
+              <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
+                <p className="text-gray-500 dark:text-gray-400 text-lg">Nenhum anúncio encontrado.</p>
+                <p className="text-gray-400 dark:text-gray-500 mt-2">Tente ajustar os filtros de busca.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
                 {listings.map((listing) => (
-                  <div key={listing.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+                  <div key={listing.id} className="bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-slate-900/50 overflow-hidden hover:shadow-lg dark:hover:shadow-slate-900/70 transition-shadow border border-gray-200 dark:border-slate-700">
                     {/* Imagem */}
                     <div className="relative">
                       {listing.images[0] ? (
@@ -206,12 +254,12 @@ export default function ListingsPage() {
                           className="w-full h-48 object-cover"
                         />
                       ) : (
-                        <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                          <span className="text-gray-400">Sem imagem</span>
+                        <div className="w-full h-48 bg-gray-200 dark:bg-slate-700 flex items-center justify-center">
+                          <span className="text-gray-400 dark:text-gray-500">Sem imagem</span>
                         </div>
                       )}
                       {listing.featured && (
-                        <div className="absolute top-2 left-2 bg-yellow-500 text-white px-2 py-1 rounded text-xs font-medium">
+                        <div className="absolute top-2 left-2 bg-yellow-500 dark:bg-yellow-600 text-white px-2 py-1 rounded text-xs font-medium">
                           DESTAQUE
                         </div>
                       )}
@@ -219,46 +267,46 @@ export default function ListingsPage() {
 
                     {/* Conteúdo */}
                     <div className="p-4">
-                      <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
                         {listing.title}
                       </h3>
 
-                      <p className="text-2xl font-bold text-blue-600 mb-3">
+                      <p className="text-2xl font-bold text-blue-600 dark:text-blue-500 mb-3">
                         {formatPrice(listing.price)}
                       </p>
 
-                      <div className="space-y-2 text-sm text-gray-600 mb-4">
+                      <div className="space-y-2 text-sm text-gray-600 dark:text-gray-400 mb-4">
                         <div className="flex items-center">
-                          <span className="font-medium w-20">Ano:</span>
-                          <span>{listing.year}</span>
+                          <span className="font-medium w-20 text-gray-500 dark:text-gray-500">Ano:</span>
+                          <span className="text-gray-900 dark:text-gray-300">{listing.year}</span>
                         </div>
 
                         {listing.mileage && (
                           <div className="flex items-center">
-                            <span className="font-medium w-20">KM:</span>
-                            <span>{listing.mileage.toLocaleString('pt-BR')}</span>
+                            <span className="font-medium w-20 text-gray-500 dark:text-gray-500">KM:</span>
+                            <span className="text-gray-900 dark:text-gray-300">{listing.mileage.toLocaleString('pt-BR')}</span>
                           </div>
                         )}
 
                         {listing.fuel && (
                           <div className="flex items-center">
-                            <Fuel className="h-4 w-4 mr-2" />
-                            <span>{listing.fuel}</span>
+                            <Fuel className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-500" />
+                            <span className="text-gray-900 dark:text-gray-300">{listing.fuel}</span>
                           </div>
                         )}
 
                         {listing.location && (
                           <div className="flex items-center">
-                            <MapPin className="h-4 w-4 mr-2" />
-                            <span>{listing.location}</span>
+                            <MapPin className="h-4 w-4 mr-2 text-gray-500 dark:text-gray-500" />
+                            <span className="text-gray-900 dark:text-gray-300">{listing.location}</span>
                           </div>
                         )}
                       </div>
 
-                      <div className="flex space-x-2">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <Link
                           href={`/listings/${listing.id}`}
-                          className="flex-1 text-center px-4 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
+                          className="flex-1 text-center px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors font-medium"
                         >
                           Ver Detalhes
                         </Link>
@@ -266,7 +314,7 @@ export default function ListingsPage() {
                         {listing.whatsapp && (
                           <button
                             onClick={() => openWhatsApp(listing.whatsapp!, listing.title)}
-                            className="flex-1 px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center justify-center"
+                            className="flex-1 px-4 py-2 bg-green-600 dark:bg-green-700 text-white rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center justify-center font-medium"
                           >
                             <Phone className="h-4 w-4 mr-2" />
                             WhatsApp

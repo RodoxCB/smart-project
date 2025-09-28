@@ -176,8 +176,8 @@ export default function EditListingPage() {
   if (fetching) {
     return (
       <AdminGuard>
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <div className="min-h-screen bg-gray-50 dark:bg-slate-900 flex items-center justify-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 dark:border-blue-500"></div>
         </div>
       </AdminGuard>
     )
@@ -185,30 +185,32 @@ export default function EditListingPage() {
 
   return (
     <AdminGuard>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
         {/* Header */}
-        <header className="bg-white shadow">
+        <header className="bg-white dark:bg-slate-800 shadow-sm">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center py-6">
-              <Link
-                href="/admin"
-                className="mr-4 inline-flex items-center px-3 py-2 border border-gray-300 text-sm leading-4 font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-              >
-                <ArrowLeft className="h-4 w-4 mr-2" />
-                Voltar
-              </Link>
-              <h1 className="text-3xl font-bold text-gray-900">Editar Anúncio</h1>
+            <div className="flex items-center py-4 md:py-6">
+              <div className="flex items-center space-x-4">
+                <Link
+                  href="/admin"
+                  className="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-slate-600 text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors"
+                >
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Voltar
+                </Link>
+                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">Editar Anúncio</h1>
+              </div>
             </div>
           </div>
         </header>
 
         {/* Form */}
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <form onSubmit={handleSubmit} className="bg-white shadow rounded-lg p-6 space-y-6">
+        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+          <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 shadow-sm dark:shadow-slate-900/50 rounded-lg p-6 space-y-6 border border-gray-200 dark:border-slate-700">
             {/* Informações Básicas */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Título *
                 </label>
                 <input
@@ -218,13 +220,13 @@ export default function EditListingPage() {
                   required
                   value={formData.title}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="Ex: Mercedes-Benz OF-1721 2019"
                 />
               </div>
 
               <div>
-                <label htmlFor="price" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="price" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Preço *
                 </label>
                 <input
@@ -235,13 +237,13 @@ export default function EditListingPage() {
                   step="0.01"
                   value={formData.price}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="285000.00"
                 />
               </div>
 
               <div>
-                <label htmlFor="brand" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="brand" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Marca *
                 </label>
                 <select
@@ -250,7 +252,7 @@ export default function EditListingPage() {
                   required
                   value={formData.brand}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">Selecione a marca</option>
                   <option value="Mercedes-Benz">Mercedes-Benz</option>
@@ -266,7 +268,7 @@ export default function EditListingPage() {
               </div>
 
               <div>
-                <label htmlFor="model" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="model" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Modelo *
                 </label>
                 <input
@@ -276,13 +278,13 @@ export default function EditListingPage() {
                   required
                   value={formData.model}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="OF-1721"
                 />
               </div>
 
               <div>
-                <label htmlFor="year" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="year" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Ano *
                 </label>
                 <input
@@ -292,13 +294,13 @@ export default function EditListingPage() {
                   required
                   value={formData.year}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="2019"
                 />
               </div>
 
               <div>
-                <label htmlFor="mileage" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="mileage" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Quilometragem
                 </label>
                 <input
@@ -307,7 +309,7 @@ export default function EditListingPage() {
                   name="mileage"
                   value={formData.mileage}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="150000"
                 />
               </div>
@@ -315,7 +317,7 @@ export default function EditListingPage() {
 
             {/* Descrição */}
             <div>
-              <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="description" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Descrição
               </label>
               <textarea
@@ -324,7 +326,7 @@ export default function EditListingPage() {
                 rows={4}
                 value={formData.description}
                 onChange={handleInputChange}
-                className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                className="mt-1 block w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Descreva o ônibus, suas características, estado de conservação, etc."
               />
             </div>
@@ -332,7 +334,7 @@ export default function EditListingPage() {
             {/* Detalhes Técnicos */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <label htmlFor="fuel" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="fuel" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Combustível
                 </label>
                 <select
@@ -340,7 +342,7 @@ export default function EditListingPage() {
                   name="fuel"
                   value={formData.fuel}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">Selecione</option>
                   <option value="Diesel">Diesel</option>
@@ -351,7 +353,7 @@ export default function EditListingPage() {
               </div>
 
               <div>
-                <label htmlFor="transmission" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="transmission" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Câmbio
                 </label>
                 <select
@@ -359,7 +361,7 @@ export default function EditListingPage() {
                   name="transmission"
                   value={formData.transmission}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="">Selecione</option>
                   <option value="Manual">Manual</option>
@@ -369,7 +371,7 @@ export default function EditListingPage() {
               </div>
 
               <div>
-                <label htmlFor="capacity" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="capacity" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Capacidade (lugares)
                 </label>
                 <input
@@ -378,7 +380,7 @@ export default function EditListingPage() {
                   name="capacity"
                   value={formData.capacity}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="46"
                 />
               </div>
@@ -387,7 +389,7 @@ export default function EditListingPage() {
             {/* Localização e Contato */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="location" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="location" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Localização
                 </label>
                 <input
@@ -396,13 +398,13 @@ export default function EditListingPage() {
                   name="location"
                   value={formData.location}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="São Paulo, SP"
                 />
               </div>
 
               <div>
-                <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="whatsapp" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   WhatsApp
                 </label>
                 <input
@@ -411,7 +413,7 @@ export default function EditListingPage() {
                   name="whatsapp"
                   value={formData.whatsapp}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500"
                   placeholder="+5511999999999"
                 />
               </div>
@@ -420,7 +422,7 @@ export default function EditListingPage() {
             {/* Status */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <label htmlFor="status" className="block text-sm font-medium text-gray-700">
+                <label htmlFor="status" className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                   Status
                 </label>
                 <select
@@ -428,7 +430,7 @@ export default function EditListingPage() {
                   name="status"
                   value={formData.status}
                   onChange={handleInputChange}
-                  className="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
+                  className="mt-1 block w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
                 >
                   <option value="active">Ativo</option>
                   <option value="inactive">Inativo</option>
@@ -445,22 +447,22 @@ export default function EditListingPage() {
                 name="featured"
                 checked={formData.featured}
                 onChange={handleInputChange}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-slate-600 rounded"
               />
-              <label htmlFor="featured" className="ml-2 block text-sm text-gray-900">
+              <label htmlFor="featured" className="ml-2 block text-sm text-gray-900 dark:text-gray-300">
                 Anúncio em destaque
               </label>
             </div>
 
             {/* Imagens */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Imagens
               </label>
 
               {/* Upload */}
               <div className="flex items-center space-x-4 mb-4">
-                <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+                <label className="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 dark:border-slate-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors">
                   <Upload className="h-4 w-4 mr-2" />
                   {uploading ? 'Enviando...' : 'Adicionar Imagem'}
                   <input
@@ -477,16 +479,16 @@ export default function EditListingPage() {
               {formData.images.length > 0 && (
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {formData.images.map((image, index) => (
-                    <div key={index} className="relative">
+                    <div key={index} className="relative group">
                       <img
                         src={image.url}
                         alt={`Imagem ${index + 1}`}
-                        className="w-full h-32 object-cover rounded-md"
+                        className="w-full h-32 object-cover rounded-md border border-gray-200 dark:border-slate-600"
                       />
                       <button
                         type="button"
                         onClick={() => removeImage(index)}
-                        className="absolute top-2 right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700"
+                        className="absolute top-2 right-2 bg-red-600 dark:bg-red-700 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs hover:bg-red-700 dark:hover:bg-red-600 transition-colors opacity-0 group-hover:opacity-100"
                       >
                         ×
                       </button>
@@ -497,17 +499,17 @@ export default function EditListingPage() {
             </div>
 
             {/* Botões */}
-            <div className="flex justify-end space-x-4">
+            <div className="flex flex-col sm:flex-row justify-end space-y-2 sm:space-y-0 sm:space-x-4">
               <Link
                 href="/admin"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                className="inline-flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-slate-600 text-sm font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-slate-700 hover:bg-gray-50 dark:hover:bg-slate-600 transition-colors"
               >
                 Cancelar
               </Link>
               <button
                 type="submit"
                 disabled={loading}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 disabled:opacity-50"
+                className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-blue-600 dark:bg-blue-700 hover:bg-blue-700 dark:hover:bg-blue-600 disabled:opacity-50 transition-colors"
               >
                 <Save className="h-4 w-4 mr-2" />
                 {loading ? 'Salvando...' : 'Atualizar Anúncio'}
