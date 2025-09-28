@@ -26,7 +26,7 @@ export async function GET() {
 
       // Buscar marcas únicas
       const brands = await prisma.listing.findMany({
-        where: { status: 'active', brand: { not: null } },
+        where: { status: 'active' },
         select: { brand: true },
         distinct: ['brand'],
         orderBy: { brand: 'asc' }
