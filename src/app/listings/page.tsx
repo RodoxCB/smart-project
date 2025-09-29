@@ -8,6 +8,7 @@ import RangeSlider from "@/components/RangeSlider"
 import ListingCardSkeleton from "@/components/ListingCardSkeleton"
 import SmartFilters from "@/components/SmartFilters"
 import { useDebounce } from "@/hooks/useDebounce"
+// import { useSession } from "next-auth/react"
 
 interface Listing {
   id: string
@@ -52,6 +53,7 @@ interface FilterStats {
 }
 
 export default function ListingsPage() {
+  // const { data: session } = useSession()
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<FilterStats | null>(null)
