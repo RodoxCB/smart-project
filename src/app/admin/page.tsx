@@ -12,11 +12,16 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
+  // Verificar se estamos no lado do cliente
+  const isClient = typeof window !== "undefined"
+
   useEffect(() => {
+    if (!isClient) return // Não executar no servidor
+
     if (session?.user?.role === "admin") {
       fetchListings()
     }
-  }, [session])
+  }, [session, isClient])
 
   const fetchListings = async () => {
     try {
