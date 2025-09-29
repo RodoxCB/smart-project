@@ -36,24 +36,32 @@ function ListingsPageContent() {
   const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => {
+    console.log('useEffect triggered, calling fetchListings')
     fetchListings()
   }, [])
 
   const fetchListings = async () => {
+    console.log('fetchListings called')
     try {
       setLoading(true)
+      console.log('Fetching from /api/listings...')
       const response = await fetch('/api/listings')
+      console.log('Response status:', response.status)
       if (response.ok) {
         const data = await response.json()
+        console.log('Data received:', data)
+        console.log('Listings count:', data.listings?.length || 0)
         setListings(data.listings || [])
         setError(null)
       } else {
+        console.error('API Error:', response.status, response.statusText)
         setError('Erro ao carregar anúncios')
       }
     } catch (error) {
       console.error('Erro ao buscar anúncios:', error)
       setError('Erro de conexão')
     } finally {
+      console.log('Setting loading to false')
       setLoading(false)
     }
   }
