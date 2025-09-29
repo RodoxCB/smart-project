@@ -37,7 +37,8 @@ export default function ListingDetailPage() {
 
   const fetchListing = async () => {
     try {
-      const response = await fetch(`/api/listings/${params.id}`)
+      const resolvedParams = await params
+      const response = await fetch(`/api/listings/${resolvedParams.id}`)
       if (response.ok) {
         const data = await response.json()
         setListing(data)
@@ -52,11 +53,15 @@ export default function ListingDetailPage() {
   }
 
   useEffect(() => {
-    if (params.id) {
-      setLoading(true)
-      fetchListing()
+    const loadListing = async () => {
+      const resolvedParams = await params
+      if (resolvedParams.id) {
+        setLoading(true)
+        fetchListing()
+      }
     }
-  }, [params.id])
+    loadListing()
+  }, [])
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {

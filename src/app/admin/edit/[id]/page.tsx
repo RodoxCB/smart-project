@@ -31,7 +31,7 @@ interface ListingFormData {
 export default function EditListingPage() {
   const router = useRouter()
   const params = useParams()
-  const listingId = params.id as string
+  const [listingId, setListingId] = useState<string>('')
 
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
@@ -53,6 +53,15 @@ export default function EditListingPage() {
     featured: false,
     images: [],
   })
+
+  // Resolver params
+  useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params
+      setListingId(resolvedParams.id as string)
+    }
+    resolveParams()
+  }, [params])
 
   // Buscar dados do anúncio
   useEffect(() => {
