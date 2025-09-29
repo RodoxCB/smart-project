@@ -54,6 +54,22 @@ interface FilterStats {
 
 function ListingsPageContent() {
   console.log('ListingsPageContent component rendered')
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Teste - Listagens Temporariamente Indisponíveis</h1>
+        <p className="text-gray-600 dark:text-gray-400">Estamos trabalhando para resolver o problema. Volte em breve!</p>
+        <div className="mt-8">
+          <a href="/" className="text-blue-600 hover:text-blue-800 dark:text-blue-400 dark:hover:text-blue-300">
+            ← Voltar ao início
+          </a>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function OldListingsPageContent() {
   const searchParams = useSearchParams()
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
