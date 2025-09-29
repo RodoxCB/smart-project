@@ -27,7 +27,8 @@ export default withAuth(
         // Permitir acesso a rotas públicas
         if (req.nextUrl.pathname.startsWith('/auth/') ||
             req.nextUrl.pathname === '/' ||
-            req.nextUrl.pathname.startsWith('/api/health')) {
+            req.nextUrl.pathname.startsWith('/api/health') ||
+            req.nextUrl.pathname.startsWith('/listings')) {
           return true
         }
 
