@@ -1,7 +1,7 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { ChevronDown, ChevronUp, X, Filter, Search, Car, Fuel, Settings, Zap, Star } from "lucide-react"
+import { useState } from "react"
+import { ChevronDown, ChevronUp, X, Filter, Search, Car, Settings, Zap, Star, DollarSign, Calendar } from "lucide-react"
 
 interface FilterStats {
   priceRange: { min: number; max: number }
@@ -53,15 +53,10 @@ interface FilterSection {
 interface FilterItem {
   key: string
   label: string
-  type: 'select' | 'range' | 'checkbox'
+  type: 'select' | 'input' | 'checkbox'
   value: any
   options?: string[]
-  rangeConfig?: {
-    min: number
-    max: number
-    step: number
-    format: (value: number) => string
-  }
+  placeholder?: string
 }
 
 export default function SmartFilters({
@@ -77,12 +72,6 @@ export default function SmartFilters({
   activeFiltersCount,
 }: SmartFiltersProps) {
   const [openSections, setOpenSections] = useState<Set<string>>(new Set(['search']))
-  const [quickFilters, setQuickFilters] = useState([
-    { id: 'recent', label: 'Recentes', icon: <Zap className="h-4 w-4" />, active: false },
-    { id: 'featured', label: 'Destaques', icon: <Star className="h-4 w-4" />, active: false },
-    { id: 'budget', label: 'Econômicos', icon: <Car className="h-4 w-4" />, active: false },
-    { id: 'new', label: 'Novos', icon: <Settings className="h-4 w-4" />, active: false },
-  ])
 
   const toggleSection = (sectionId: string) => {
     const newOpenSections = new Set(openSections)
@@ -95,38 +84,23 @@ export default function SmartFilters({
   }
 
   const handleQuickFilter = (filterId: string) => {
-    const wasActive = quickFilters.find(f => f.id === filterId)?.active
-
-    setQuickFilters(prev =>
-      prev.map(f => ({ ...f, active: f.id === filterId ? !f.active : false }))
-    )
-
-    // Aplicar lógica do filtro rápido
     switch (filterId) {
       case 'recent':
-        if (!wasActive) {
-          onSortChange('createdAt', 'desc')
-        } else {
-          onSortChange('createdAt', 'desc')
-        }
+        onSortChange('createdAt', 'desc')
         break
       case 'featured':
-        onFilterChange('featured', !wasActive)
+        onFilterChange('featured', !filters.featured)
         break
       case 'budget':
-        if (!wasActive) {
-          onPriceRangeChange(50000, 150000)
-        } else {
-          // Reset para valores padrão quando desativar
-          onPriceRangeChange(50000, 1000000)
+        if (stats) {
+          const budgetMax = Math.min(stats.priceRange.max, 200000)
+          onPriceRangeChange(stats.priceRange.min, budgetMax)
         }
         break
       case 'new':
-        if (!wasActive) {
-          onYearRangeChange(new Date().getFullYear() - 2, new Date().getFullYear())
-        } else {
-          // Reset para valores padrão quando desativar
-          onYearRangeChange(2010, new Date().getFullYear())
+        if (stats) {
+          const currentYear = new Date().getFullYear()
+          onYearRangeChange(currentYear - 3, currentYear)
         }
         break
     }
@@ -203,16 +177,16 @@ export default function SmartFilters({
   const sections: FilterSection[] = [
     {
       id: 'search',
-      title: 'Busca e Categoria',
+      title: 'Busca',
       icon: <Search className="h-4 w-4" />,
       isOpen: openSections.has('search'),
       filters: [
         {
           key: 'search',
-          label: 'Buscar',
-          type: 'select',
+          label: 'Buscar por termo',
+          type: 'input',
           value: filters.search,
-          options: ['Mercedes-Benz', 'Volvo', 'Scania', 'MAN', 'Iveco', 'Marcopolo', 'Caio']
+          placeholder: 'Título, modelo, localização...'
         },
         {
           key: 'brand',
@@ -225,21 +199,37 @@ export default function SmartFilters({
     },
     {
       id: 'price',
-      title: 'Preço',
-      icon: <Car className="h-4 w-4" />,
+      title: 'Preço e Ano',
+      icon: <DollarSign className="h-4 w-4" />,
       isOpen: openSections.has('price'),
       filters: [
         {
-          key: 'price',
-          label: 'Faixa de Preço',
-          type: 'range',
-          value: [filters.minPrice, filters.maxPrice],
-          rangeConfig: stats ? {
-            min: stats.priceRange.min,
-            max: stats.priceRange.max,
-            step: 1000,
-            format: (value) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value)
-          } : undefined
+          key: 'minPrice',
+          label: 'Preço mínimo',
+          type: 'input',
+          value: filters.minPrice,
+          placeholder: '0'
+        },
+        {
+          key: 'maxPrice',
+          label: 'Preço máximo',
+          type: 'input',
+          value: filters.maxPrice,
+          placeholder: '1000000'
+        },
+        {
+          key: 'minYear',
+          label: 'Ano mínimo',
+          type: 'input',
+          value: filters.minYear,
+          placeholder: '2010'
+        },
+        {
+          key: 'maxYear',
+          label: 'Ano máximo',
+          type: 'input',
+          value: filters.maxYear,
+          placeholder: String(new Date().getFullYear())
         }
       ]
     },
@@ -262,38 +252,34 @@ export default function SmartFilters({
           type: 'select',
           value: filters.transmission,
           options: stats?.transmissions || []
+        },
+        {
+          key: 'featured',
+          label: 'Apenas destaques',
+          type: 'checkbox',
+          value: filters.featured
         }
       ]
     },
     {
       id: 'condition',
       title: 'Condição',
-      icon: <Fuel className="h-4 w-4" />,
+      icon: <Car className="h-4 w-4" />,
       isOpen: openSections.has('condition'),
       filters: [
         {
-          key: 'year',
-          label: 'Ano',
-          type: 'range',
-          value: [filters.minYear, filters.maxYear],
-          rangeConfig: stats ? {
-            min: stats.yearRange.min,
-            max: stats.yearRange.max,
-            step: 1,
-            format: (value) => value.toString()
-          } : undefined
+          key: 'minMileage',
+          label: 'KM mínimo',
+          type: 'input',
+          value: filters.minMileage,
+          placeholder: '0'
         },
         {
-          key: 'mileage',
-          label: 'Quilometragem',
-          type: 'range',
-          value: [filters.minMileage, filters.maxMileage],
-          rangeConfig: stats ? {
-            min: stats.mileageRange.min,
-            max: stats.mileageRange.max,
-            step: 5000,
-            format: (value) => `${value.toLocaleString('pt-BR')} km`
-          } : undefined
+          key: 'maxMileage',
+          label: 'KM máximo',
+          type: 'input',
+          value: filters.maxMileage,
+          placeholder: '500000'
         }
       ]
     }
@@ -306,7 +292,7 @@ export default function SmartFilters({
         <div className="flex items-center justify-between">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
             <Filter className="h-5 w-5 mr-2" />
-            Filtros Inteligentes
+            Filtros
           </h3>
           {activeFiltersCount > 0 && (
             <button
@@ -320,20 +306,38 @@ export default function SmartFilters({
 
         {/* Filtros rápidos */}
         <div className="mt-3 flex flex-wrap gap-2">
-          {quickFilters.map((filter) => (
-            <button
-              key={filter.id}
-              onClick={() => handleQuickFilter(filter.id)}
-              className={`px-3 py-1 text-xs rounded-full border transition-colors flex items-center gap-1 ${
-                filter.active
-                  ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-600'
-                  : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-slate-600 hover:bg-gray-200 dark:hover:bg-slate-600'
-              }`}
-            >
-              {filter.icon}
-              {filter.label}
-            </button>
-          ))}
+          <button
+            onClick={() => handleQuickFilter('recent')}
+            className="px-3 py-1 text-xs rounded-full border transition-colors flex items-center gap-1 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-slate-600 hover:bg-gray-200 dark:hover:bg-slate-600"
+          >
+            <Zap className="h-4 w-4" />
+            Recentes
+          </button>
+          <button
+            onClick={() => handleQuickFilter('featured')}
+            className={`px-3 py-1 text-xs rounded-full border transition-colors flex items-center gap-1 ${
+              filters.featured
+                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border-blue-300 dark:border-blue-600'
+                : 'bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-slate-600 hover:bg-gray-200 dark:hover:bg-slate-600'
+            }`}
+          >
+            <Star className="h-4 w-4" />
+            Destaques
+          </button>
+          <button
+            onClick={() => handleQuickFilter('budget')}
+            className="px-3 py-1 text-xs rounded-full border transition-colors flex items-center gap-1 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-slate-600 hover:bg-gray-200 dark:hover:bg-slate-600"
+          >
+            <DollarSign className="h-4 w-4" />
+            Econômicos
+          </button>
+          <button
+            onClick={() => handleQuickFilter('new')}
+            className="px-3 py-1 text-xs rounded-full border transition-colors flex items-center gap-1 bg-gray-100 dark:bg-slate-700 text-gray-600 dark:text-gray-400 border-gray-300 dark:border-slate-600 hover:bg-gray-200 dark:hover:bg-slate-600"
+          >
+            <Calendar className="h-4 w-4" />
+            Novos
+          </button>
         </div>
       </div>
 
@@ -380,69 +384,52 @@ export default function SmartFilters({
 
             {section.isOpen && (
               <div className="px-4 pb-4">
-                {section.filters.map((filter) => (
-                  <div key={filter.key} className="mb-4 last:mb-0">
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      {filter.label}
-                    </label>
-
-                    {filter.type === 'select' && (
-                      <select
-                        value={filter.value}
-                        onChange={(e) => onFilterChange(filter.key, e.target.value)}
-                        className="w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 px-3 py-2 text-sm"
-                      >
-                        <option value="">{`Todas as ${filter.label.toLowerCase()}`}</option>
-                        {filter.options?.map((option) => (
-                          <option key={option} value={option}>
-                            {option}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-
-                    {filter.type === 'range' && filter.rangeConfig && (
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm text-gray-600 dark:text-gray-400">
-                          <span>{filter.rangeConfig.format(filter.rangeConfig.min)}</span>
-                          <span className="font-medium">
-                            {Array.isArray(filter.value) && filter.value.length === 2
-                              ? `${filter.rangeConfig.format(filter.value[0])} - ${filter.rangeConfig.format(filter.value[1])}`
-                              : 'Selecionar faixa'
-                            }
-                          </span>
-                          <span>{filter.rangeConfig.format(filter.rangeConfig.max)}</span>
-                        </div>
-                        <input
-                          type="range"
-                          min={filter.rangeConfig.min}
-                          max={filter.rangeConfig.max}
-                          value={Array.isArray(filter.value) ? filter.value[0] : filter.rangeConfig.min}
-                          onChange={(e) => {
-                            const newMin = parseInt(e.target.value)
-                            const newMax = Array.isArray(filter.value) ? filter.value[1] : filter.rangeConfig!.max
-                            if (filter.key === 'price') onPriceRangeChange(newMin, newMax)
-                            if (filter.key === 'year') onYearRangeChange(newMin, newMax)
-                            if (filter.key === 'mileage') onMileageRangeChange(newMin, newMax)
-                          }}
-                          className="w-full h-2 bg-gray-200 dark:bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
-                        />
-                      </div>
-                    )}
-
-                    {filter.type === 'checkbox' && (
-                      <label className="flex items-center">
-                        <input
-                          type="checkbox"
-                          checked={filter.value}
-                          onChange={(e) => onFilterChange(filter.key, e.target.checked)}
-                          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-slate-600 rounded"
-                        />
-                        <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Apenas destaques</span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {section.filters.map((filter) => (
+                    <div key={filter.key}>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        {filter.label}
                       </label>
-                    )}
-                  </div>
-                ))}
+
+                      {filter.type === 'select' && (
+                        <select
+                          value={filter.value}
+                          onChange={(e) => onFilterChange(filter.key, e.target.value)}
+                          className="w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 px-3 py-2 text-sm"
+                        >
+                          <option value="">{`Todas as ${filter.label.toLowerCase()}`}</option>
+                          {filter.options?.map((option) => (
+                            <option key={option} value={option}>
+                              {option}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+
+                      {filter.type === 'input' && (
+                        <input
+                          type="number"
+                          value={filter.value}
+                          onChange={(e) => onFilterChange(filter.key, parseInt(e.target.value) || 0)}
+                          placeholder={filter.placeholder}
+                          className="w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 px-3 py-2 text-sm"
+                        />
+                      )}
+
+                      {filter.type === 'checkbox' && (
+                        <label className="flex items-center">
+                          <input
+                            type="checkbox"
+                            checked={filter.value}
+                            onChange={(e) => onFilterChange(filter.key, e.target.checked)}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-slate-600 rounded"
+                          />
+                          <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">{filter.label}</span>
+                        </label>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
