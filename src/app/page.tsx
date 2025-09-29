@@ -3,9 +3,21 @@
 import Link from "next/link"
 import { Search, Phone, Shield, Truck, Menu } from "lucide-react"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 
 export default function Home() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState("")
+  const router = useRouter()
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (searchQuery.trim()) {
+      router.push(`/listings?search=${encodeURIComponent(searchQuery.trim())}`)
+    } else {
+      router.push('/listings')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-slate-900 dark:to-slate-800">
@@ -77,19 +89,24 @@ export default function Home() {
 
           {/* Search Bar */}
           <div className="mt-8 max-w-2xl mx-auto px-4">
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-0">
+            <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-2 sm:gap-0">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-3 h-5 w-5 text-gray-400 dark:text-gray-500" />
                 <input
                   type="text"
                   placeholder="Buscar por marca, modelo ou localização..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-md sm:rounded-l-md sm:rounded-r-none bg-white dark:bg-slate-800 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
-              <button className="px-6 py-3 bg-blue-600 dark:bg-blue-700 text-white rounded-md sm:rounded-r-md sm:rounded-l-none hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium">
+              <button
+                type="submit"
+                className="px-6 py-3 bg-blue-600 dark:bg-blue-700 text-white rounded-md sm:rounded-r-md sm:rounded-l-none hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors font-medium"
+              >
                 Buscar
               </button>
-            </div>
+            </form>
           </div>
         </div>
 
