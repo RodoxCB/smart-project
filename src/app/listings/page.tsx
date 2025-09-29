@@ -178,7 +178,7 @@ export default function ListingsPage() {
       search: urlSearch,
       brand: urlBrand,
     }))
-  }, [])
+  }, [searchParams])
 
   // Load initial data on mount
   useEffect(() => {
