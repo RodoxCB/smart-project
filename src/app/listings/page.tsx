@@ -53,6 +53,7 @@ interface FilterStats {
 }
 
 export default function ListingsPage() {
+  const searchParams = useSearchParams()
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
