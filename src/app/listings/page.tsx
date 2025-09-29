@@ -53,6 +53,7 @@ interface FilterStats {
 }
 
 function ListingsPageContent() {
+  console.log('ListingsPageContent component rendered')
   const searchParams = useSearchParams()
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
