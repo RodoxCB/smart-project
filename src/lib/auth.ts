@@ -62,13 +62,6 @@ export const authOptions: NextAuthOptions = {
         session.user.role = token.role as string
       }
       return session
-    },
-    async redirect({ url, baseUrl }) {
-      // Permite redirecionamentos para URLs internas e externas
-      if (url.startsWith(baseUrl)) return url
-      // Para URLs externas, permite apenas se for callbackUrl
-      if (url.includes('callbackUrl=')) return url
-      return baseUrl
     }
   },
   pages: {
