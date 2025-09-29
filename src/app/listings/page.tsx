@@ -100,8 +100,9 @@ function ListingsPageContent() {
     }
   }, [])
 
-  const fetchListings = useCallback(async () => {
+  const fetchListings = async () => {
     try {
+      setLoading(true)
       let url = '/api/listings'
 
       // Build query params only if filters have values
@@ -167,7 +168,7 @@ function ListingsPageContent() {
     } finally {
       setLoading(false)
     }
-  }, [filters.search, filters.brand, filters.minPrice, filters.maxPrice, filters.minYear, filters.maxYear, filters.minMileage, filters.maxMileage, filters.fuel, filters.transmission, filters.sortBy, filters.sortOrder, filters.featured])
+  }
 
   // Get URL parameters
   const urlSearch = searchParams?.get('search') || ''
@@ -182,25 +183,18 @@ function ListingsPageContent() {
     }))
   }, [urlSearch, urlBrand])
 
-  // Load initial data on mount
-  useEffect(() => {
-    const loadInitialData = async () => {
-      setLoading(true)
-      await fetchStats()
-      await fetchListings()
-    }
-    loadInitialData()
-  }, [])
-
   // Debounce dos filtros para evitar múltiplas requisições
   const debouncedFilters = useDebounce(filters, 300)
 
   useEffect(() => {
-    if (debouncedFilters !== filters) {
-      setLoading(true)
-      fetchListings()
-    }
+    fetchListings()
   }, [debouncedFilters])
+
+  // Load initial data on mount
+  useEffect(() => {
+    fetchStats()
+    fetchListings()
+  }, [])
 
   const handleFilterChange = (key: string, value: string | boolean) => {
     setFilters(prev => ({ ...prev, [key]: value }))
