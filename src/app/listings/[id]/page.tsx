@@ -2,31 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
-import { Metadata } from "next"
 import Link from "next/link"
 import { Phone, MapPin, Fuel, Settings, Users, ArrowLeft, Calendar } from "lucide-react"
 import ImageWithFallback from "@/components/ImageWithFallback"
-
-interface ListingDetailPageProps {
-  params: {
-    id: string
-  }
-}
-
-export async function generateMetadata({ params }: ListingDetailPageProps): Promise<Metadata> {
-  // In a real app, you'd fetch the listing data here
-  // For now, we'll use generic metadata
-  return {
-    title: `Ônibus - BusMarket`,
-    description: "Detalhes completos do ônibus incluindo especificações, fotos e informações de contato.",
-    openGraph: {
-      title: `Ônibus - BusMarket`,
-      description: "Detalhes completos do ônibus incluindo especificações, fotos e informações de contato.",
-      type: "website",
-      url: `https://smart-project-orpin.vercel.app/listings/${params.id}`,
-    },
-  }
-}
 
 interface Listing {
   id: string

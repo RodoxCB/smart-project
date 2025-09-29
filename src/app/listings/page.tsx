@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react"
 import { useSearchParams } from "next/navigation"
-import { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import { Phone, MapPin, Fuel, ArrowLeft, Filter, X } from "lucide-react"
@@ -10,20 +9,6 @@ import RangeSlider from "@/components/RangeSlider"
 import ListingCardSkeleton from "@/components/ListingCardSkeleton"
 import ImageWithFallback from "@/components/ImageWithFallback"
 import { useDebounce } from "@/hooks/useDebounce"
-
-export async function generateMetadata(): Promise<Metadata> {
-  return {
-    title: "Anúncios de Ônibus - BusMarket",
-    description: "Explore nossa ampla variedade de ônibus novos e usados à venda. Encontre o veículo perfeito para seu negócio com filtros avançados.",
-    keywords: ["ônibus à venda", "autocarros usados", "compra ônibus", "venda ônibus", "transporte público", "frota empresarial"],
-    openGraph: {
-      title: "Anúncios de Ônibus - BusMarket",
-      description: "Explore nossa ampla variedade de ônibus novos e usados à venda.",
-      type: "website",
-      url: "https://smart-project-orpin.vercel.app/listings",
-    },
-  }
-}
 
 interface Listing {
   id: string
