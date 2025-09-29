@@ -37,28 +37,9 @@ export default function RangeSlider({
     setMaxVal(clampedMax)
   }, [currentMin, currentMax, minValue, maxValue])
 
-  // Debug log
-  useEffect(() => {
-    console.log('RangeSlider props:', {
-      minValue,
-      maxValue,
-      currentMin,
-      currentMax,
-      minVal,
-      maxVal
-    })
-  }, [minValue, maxValue, currentMin, currentMax, minVal, maxVal])
 
   const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value)
-    console.log('RangeSlider min change:', {
-      rawValue: value,
-      currentMinVal: minVal,
-      currentMaxVal: maxVal,
-      step,
-      minValue,
-      maxValue
-    })
 
     // Simples validação para garantir que min não seja maior que max
     const newMinVal = Math.min(value, maxVal - step)
@@ -68,14 +49,6 @@ export default function RangeSlider({
 
   const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number(e.target.value)
-    console.log('RangeSlider max change:', {
-      rawValue: value,
-      currentMinVal: minVal,
-      currentMaxVal: maxVal,
-      step,
-      minValue,
-      maxValue
-    })
 
     // Simples validação para garantir que max não seja menor que min
     const newMaxVal = Math.max(value, minVal + step)

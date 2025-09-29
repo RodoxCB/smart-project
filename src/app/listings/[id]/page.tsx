@@ -2,8 +2,31 @@
 
 import { useState, useEffect } from "react"
 import { useParams } from "next/navigation"
+import { Metadata } from "next"
 import Link from "next/link"
 import { Phone, MapPin, Fuel, Settings, Users, ArrowLeft, Calendar } from "lucide-react"
+import ImageWithFallback from "@/components/ImageWithFallback"
+
+interface ListingDetailPageProps {
+  params: {
+    id: string
+  }
+}
+
+export async function generateMetadata({ params }: ListingDetailPageProps): Promise<Metadata> {
+  // In a real app, you'd fetch the listing data here
+  // For now, we'll use generic metadata
+  return {
+    title: `Ônibus - BusMarket`,
+    description: "Detalhes completos do ônibus incluindo especificações, fotos e informações de contato.",
+    openGraph: {
+      title: `Ônibus - BusMarket`,
+      description: "Detalhes completos do ônibus incluindo especificações, fotos e informações de contato.",
+      type: "website",
+      url: `https://smart-project-orpin.vercel.app/listings/${params.id}`,
+    },
+  }
+}
 
 interface Listing {
   id: string
@@ -65,9 +88,32 @@ export default function ListingDetailPage() {
   }
 
   const openWhatsApp = (whatsapp: string, title: string) => {
-    const message = `Olá! Tenho interesse no ônibus ${title} que vi no BusMarket.`
-    const url = `https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`
-    window.open(url, '_blank')
+    try {
+      // Clean phone number (remove all non-digits)
+      const cleanNumber = whatsapp.replace(/\D/g, '')
+
+      // Validate phone number length
+      if (cleanNumber.length < 10 || cleanNumber.length > 15) {
+        alert('Número do WhatsApp inválido. Entre em contato diretamente com o vendedor.')
+        return
+      }
+
+      const message = `Olá! Tenho interesse no ônibus ${title} que encontrei no BusMarket.`
+      const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`
+
+      // Track WhatsApp click (if analytics is available)
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'click_whatsapp', {
+          'event_category': 'engagement',
+          'event_label': title
+        })
+      }
+
+      window.open(url, '_blank')
+    } catch (error) {
+      console.error('Erro ao abrir WhatsApp:', error)
+      alert('Erro ao abrir WhatsApp. Tente novamente ou entre em contato diretamente.')
+    }
   }
 
   if (loading) {
@@ -116,7 +162,7 @@ export default function ListingDetailPage() {
               {listing.images.length > 0 ? (
                 <>
                   <div className="relative">
-                    <img
+                    <ImageWithFallback
                       src={listing.images[currentImageIndex].url}
                       alt={listing.title}
                       className="w-full h-96 object-cover"
@@ -130,18 +176,18 @@ export default function ListingDetailPage() {
 
                   {/* Miniaturas */}
                   {listing.images.length > 1 && (
-                    <div className="p-4 flex space-x-2 overflow-x-auto">
+                    <div className="p-4 flex space-x-2 overflow-x-auto pb-safe">
                       {listing.images.map((image, index) => (
                         <button
                           key={image.id}
                           onClick={() => setCurrentImageIndex(index)}
-                          className={`flex-shrink-0 w-20 h-20 rounded-md overflow-hidden border-2 transition-colors ${
+                          className={`flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 rounded-md overflow-hidden border-2 transition-colors touch-manipulation ${
                             index === currentImageIndex
                               ? 'border-blue-500 dark:border-blue-400'
                               : 'border-gray-200 dark:border-slate-600 hover:border-gray-300 dark:hover:border-slate-500'
                           }`}
                         >
-                          <img
+                          <ImageWithFallback
                             src={image.url}
                             alt={`${listing.title} - Imagem ${index + 1}`}
                             className="w-full h-full object-cover"
@@ -175,7 +221,7 @@ export default function ListingDetailPage() {
             {listing.whatsapp && (
               <button
                 onClick={() => openWhatsApp(listing.whatsapp!, listing.title)}
-                className="w-full bg-green-600 dark:bg-green-700 text-white py-4 px-6 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center justify-center text-lg font-medium shadow-sm"
+                className="w-full bg-green-600 dark:bg-green-700 text-white py-4 px-6 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center justify-center text-lg font-medium shadow-sm touch-manipulation"
               >
                 <Phone className="h-6 w-6 mr-3" />
                 Falar no WhatsApp
@@ -186,7 +232,7 @@ export default function ListingDetailPage() {
             <div className="bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-slate-900/50 p-6 border border-gray-200 dark:border-slate-700">
               <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">Especificações</h3>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="flex items-center">
                   <Calendar className="h-5 w-5 text-gray-400 dark:text-gray-500 mr-2" />
                   <div>

@@ -1,12 +1,29 @@
 "use client"
 
 import { useState, useEffect, useCallback } from "react"
+import { useSearchParams } from "next/navigation"
+import { Metadata } from "next"
 import Link from "next/link"
 import Image from "next/image"
 import { Phone, MapPin, Fuel, ArrowLeft, Filter, X } from "lucide-react"
 import RangeSlider from "@/components/RangeSlider"
 import ListingCardSkeleton from "@/components/ListingCardSkeleton"
+import ImageWithFallback from "@/components/ImageWithFallback"
 import { useDebounce } from "@/hooks/useDebounce"
+
+export async function generateMetadata(): Promise<Metadata> {
+  return {
+    title: "Anúncios de Ônibus - BusMarket",
+    description: "Explore nossa ampla variedade de ônibus novos e usados à venda. Encontre o veículo perfeito para seu negócio com filtros avançados.",
+    keywords: ["ônibus à venda", "autocarros usados", "compra ônibus", "venda ônibus", "transporte público", "frota empresarial"],
+    openGraph: {
+      title: "Anúncios de Ônibus - BusMarket",
+      description: "Explore nossa ampla variedade de ônibus novos e usados à venda.",
+      type: "website",
+      url: "https://smart-project-orpin.vercel.app/listings",
+    },
+  }
+}
 
 interface Listing {
   id: string
@@ -53,12 +70,13 @@ interface FilterStats {
 export default function ListingsPage() {
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [showFilters, setShowFilters] = useState(false)
   const [stats, setStats] = useState<FilterStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
-  const [filters, setFilters] = useState({
-    search: '',
-    brand: '',
+  const [filters, setFilters] = useState(() => ({
+    search: searchParams?.get('search') || '',
+    brand: searchParams?.get('brand') || '',
     minPrice: 50000,
     maxPrice: 1000000,
     minYear: 2010,
@@ -70,7 +88,7 @@ export default function ListingsPage() {
     sortBy: 'createdAt',
     sortOrder: 'desc',
     featured: false,
-  })
+  }))
 
   const fetchStats = useCallback(async () => {
     try {
@@ -152,11 +170,14 @@ export default function ListingsPage() {
       if (response.ok) {
         const data = await response.json()
         setListings(data.listings)
+        setError(null)
       } else {
         console.error('Erro na resposta da API:', response.status, response.statusText)
+        setError(`Erro ao carregar anúncios: ${response.statusText}`)
       }
     } catch (error) {
       console.error('Erro ao buscar anúncios:', error)
+      setError('Erro de conexão. Tente novamente mais tarde.')
     } finally {
       setLoading(false)
     }
@@ -240,9 +261,32 @@ export default function ListingsPage() {
   }
 
   const openWhatsApp = (whatsapp: string, title: string) => {
-    const message = `Olá! Tenho interesse no ônibus ${title}.`
-    const url = `https://wa.me/${whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(message)}`
-    window.open(url, '_blank')
+    try {
+      // Clean phone number (remove all non-digits)
+      const cleanNumber = whatsapp.replace(/\D/g, '')
+
+      // Validate phone number length
+      if (cleanNumber.length < 10 || cleanNumber.length > 15) {
+        alert('Número do WhatsApp inválido. Entre em contato diretamente com o vendedor.')
+        return
+      }
+
+      const message = `Olá! Tenho interesse no ônibus ${title} que encontrei no BusMarket.`
+      const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`
+
+      // Track WhatsApp click (if analytics is available)
+      if (typeof window !== 'undefined' && (window as any).gtag) {
+        (window as any).gtag('event', 'click_whatsapp', {
+          'event_category': 'engagement',
+          'event_label': title
+        })
+      }
+
+      window.open(url, '_blank')
+    } catch (error) {
+      console.error('Erro ao abrir WhatsApp:', error)
+      alert('Erro ao abrir WhatsApp. Tente novamente ou entre em contato diretamente.')
+    }
   }
 
   return (
@@ -528,6 +572,20 @@ export default function ListingsPage() {
                   <ListingCardSkeleton key={index} />
                 ))}
               </div>
+            ) : error ? (
+              <div className="text-center py-12 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800">
+                <p className="text-red-600 dark:text-red-400 text-lg font-medium">{error}</p>
+                <button
+                  onClick={() => {
+                    setError(null)
+                    setLoading(true)
+                    fetchListings()
+                  }}
+                  className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors text-sm font-medium"
+                >
+                  Tentar Novamente
+                </button>
+              </div>
             ) : listings.length === 0 ? (
               <div className="text-center py-12 bg-white dark:bg-slate-800 rounded-lg border border-gray-200 dark:border-slate-700">
                 <p className="text-gray-500 dark:text-gray-400 text-lg">Nenhum anúncio encontrado.</p>
@@ -540,11 +598,9 @@ export default function ListingsPage() {
                     {/* Imagem */}
                     <div className="relative">
                       {listing.images[0] ? (
-                        <Image
+                        <ImageWithFallback
                           src={listing.images[0].url}
                           alt={listing.title}
-                          width={400}
-                          height={192}
                           className="w-full h-48 object-cover"
                         />
                       ) : (
@@ -608,7 +664,7 @@ export default function ListingsPage() {
                         {listing.whatsapp && (
                           <button
                             onClick={() => openWhatsApp(listing.whatsapp!, listing.title)}
-                            className="flex-1 px-4 py-2 bg-green-600 dark:bg-green-700 text-white rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center justify-center font-medium"
+                            className="flex-1 px-4 py-2 bg-green-600 dark:bg-green-700 text-white rounded-md hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center justify-center font-medium touch-manipulation"
                           >
                             <Phone className="h-4 w-4 mr-2" />
                             WhatsApp
