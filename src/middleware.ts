@@ -24,16 +24,31 @@ export default withAuth(
   {
     callbacks: {
       authorized: ({ token, req }) => {
-        // Permitir acesso a rotas públicas
-        if (req.nextUrl.pathname.startsWith('/auth/') ||
-            req.nextUrl.pathname === '/' ||
-            req.nextUrl.pathname.startsWith('/api/health') ||
-            req.nextUrl.pathname.startsWith('/listings')) {
+        const pathname = req.nextUrl.pathname
+
+        // Rotas públicas que não requerem autenticação
+        const publicRoutes = [
+          '/',
+          '/auth/',
+          '/api/health',
+          '/api/listings',
+          '/listings',
+          '/favicon.ico',
+          '/_next/',
+          '/api/auth/',
+        ]
+
+        // Verificar se é uma rota pública
+        const isPublicRoute = publicRoutes.some(route =>
+          pathname === route || pathname.startsWith(route)
+        )
+
+        if (isPublicRoute) {
           return true
         }
 
         // Para rotas de API que requerem autenticação, deixar a verificação para a própria API
-        if (req.nextUrl.pathname.startsWith('/api/')) {
+        if (pathname.startsWith('/api/') && !pathname.startsWith('/api/auth/')) {
           return true
         }
 
