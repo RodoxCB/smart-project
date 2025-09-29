@@ -168,17 +168,18 @@ export default function ListingsPage() {
     }
   }, [filters.search, filters.brand, filters.minPrice, filters.maxPrice, filters.minYear, filters.maxYear, filters.minMileage, filters.maxMileage, filters.fuel, filters.transmission, filters.sortBy, filters.sortOrder, filters.featured])
 
+  // Get URL parameters
+  const urlSearch = searchParams?.get('search') || ''
+  const urlBrand = searchParams?.get('brand') || ''
+
   // Initialize filters with URL parameters
   useEffect(() => {
-    const urlSearch = searchParams?.get('search') || ''
-    const urlBrand = searchParams?.get('brand') || ''
-
     setFilters(prev => ({
       ...prev,
       search: urlSearch,
       brand: urlBrand,
     }))
-  }, [searchParams])
+  }, [urlSearch, urlBrand])
 
   // Load initial data on mount
   useEffect(() => {
