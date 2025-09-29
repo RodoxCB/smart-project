@@ -96,50 +96,54 @@ export default function ListingsPage() {
     }
   }, [])
 
-  const fetchListings = useCallback(async () => {
+  const fetchListings = useCallback(async (currentFilters = filters) => {
+    // Evitar múltiplas requisições simultâneas
+    if (loading) return
+
     try {
+      setLoading(true)
       let url = '/api/listings'
 
       // Build query params only if filters have values
       const queryParams = []
 
-      if (filters.search && filters.search.trim()) {
-        queryParams.push(`search=${encodeURIComponent(filters.search.trim())}`)
+      if (currentFilters.search && currentFilters.search.trim()) {
+        queryParams.push(`search=${encodeURIComponent(currentFilters.search.trim())}`)
       }
-      if (filters.brand && filters.brand.trim()) {
-        queryParams.push(`brand=${encodeURIComponent(filters.brand.trim())}`)
+      if (currentFilters.brand && currentFilters.brand.trim()) {
+        queryParams.push(`brand=${encodeURIComponent(currentFilters.brand.trim())}`)
       }
-      if (filters.minPrice > 0) {
-        queryParams.push(`minPrice=${filters.minPrice}`)
+      if (currentFilters.minPrice > 0) {
+        queryParams.push(`minPrice=${currentFilters.minPrice}`)
       }
-      if (filters.maxPrice < 10000000) { // Valor muito alto para indicar "sem limite superior"
-        queryParams.push(`maxPrice=${filters.maxPrice}`)
+      if (currentFilters.maxPrice < 10000000) { // Valor muito alto para indicar "sem limite superior"
+        queryParams.push(`maxPrice=${currentFilters.maxPrice}`)
       }
-      if (filters.minYear > 0) {
-        queryParams.push(`minYear=${filters.minYear}`)
+      if (currentFilters.minYear > 0) {
+        queryParams.push(`minYear=${currentFilters.minYear}`)
       }
-      if (filters.maxYear < 9999) {
-        queryParams.push(`maxYear=${filters.maxYear}`)
+      if (currentFilters.maxYear < 9999) {
+        queryParams.push(`maxYear=${currentFilters.maxYear}`)
       }
-      if (filters.minMileage > 0) {
-        queryParams.push(`minMileage=${filters.minMileage}`)
+      if (currentFilters.minMileage > 0) {
+        queryParams.push(`minMileage=${currentFilters.minMileage}`)
       }
-      if (filters.maxMileage < 9999999) {
-        queryParams.push(`maxMileage=${filters.maxMileage}`)
+      if (currentFilters.maxMileage < 9999999) {
+        queryParams.push(`maxMileage=${currentFilters.maxMileage}`)
       }
-      if (filters.fuel && filters.fuel.trim()) {
-        queryParams.push(`fuel=${encodeURIComponent(filters.fuel.trim())}`)
+      if (currentFilters.fuel && currentFilters.fuel.trim()) {
+        queryParams.push(`fuel=${encodeURIComponent(currentFilters.fuel.trim())}`)
       }
-      if (filters.transmission && filters.transmission.trim()) {
-        queryParams.push(`transmission=${encodeURIComponent(filters.transmission.trim())}`)
+      if (currentFilters.transmission && currentFilters.transmission.trim()) {
+        queryParams.push(`transmission=${encodeURIComponent(currentFilters.transmission.trim())}`)
       }
-      if (filters.sortBy && filters.sortBy !== 'createdAt') {
-        queryParams.push(`sortBy=${filters.sortBy}`)
+      if (currentFilters.sortBy && currentFilters.sortBy !== 'createdAt') {
+        queryParams.push(`sortBy=${currentFilters.sortBy}`)
       }
-      if (filters.sortOrder && filters.sortOrder !== 'desc') {
-        queryParams.push(`sortOrder=${filters.sortOrder}`)
+      if (currentFilters.sortOrder && currentFilters.sortOrder !== 'desc') {
+        queryParams.push(`sortOrder=${currentFilters.sortOrder}`)
       }
-      if (filters.featured) {
+      if (currentFilters.featured) {
         queryParams.push('featured=true')
       }
 
@@ -160,21 +164,22 @@ export default function ListingsPage() {
     } finally {
       setLoading(false)
     }
-  }, [filters.search, filters.brand, filters.minPrice, filters.maxPrice, filters.minYear, filters.maxYear, filters.minMileage, filters.maxMileage, filters.fuel, filters.transmission, filters.sortBy, filters.sortOrder, filters.featured])
+  }, [loading]) // Removida dependência de todos os filtros
 
   // Load initial data on mount
   useEffect(() => {
     fetchStats()
-    setLoading(true)
     fetchListings()
   }, [fetchStats, fetchListings])
 
-  // Debounce dos filtros para evitar múltiplas requisições
-  const debouncedFilters = useDebounce(filters, 300)
+  // Debounce dos filtros para evitar múltiplas requisições (tempo aumentado para melhor UX)
+  const debouncedFilters = useDebounce(filters, 600)
 
+  // Chamar fetchListings quando os filtros debounced mudarem
   useEffect(() => {
-    setLoading(true)
-    fetchListings()
+    if (debouncedFilters) {
+      fetchListings(debouncedFilters)
+    }
   }, [debouncedFilters, fetchListings])
 
   const handleFilterChange = (key: string, value: string | boolean | number) => {

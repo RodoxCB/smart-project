@@ -95,6 +95,8 @@ export default function SmartFilters({
   }
 
   const handleQuickFilter = (filterId: string) => {
+    const wasActive = quickFilters.find(f => f.id === filterId)?.active
+
     setQuickFilters(prev =>
       prev.map(f => ({ ...f, active: f.id === filterId ? !f.active : false }))
     )
@@ -102,19 +104,29 @@ export default function SmartFilters({
     // Aplicar lógica do filtro rápido
     switch (filterId) {
       case 'recent':
-        onSortChange('createdAt', 'desc')
+        if (!wasActive) {
+          onSortChange('createdAt', 'desc')
+        } else {
+          onSortChange('createdAt', 'desc')
+        }
         break
       case 'featured':
-        onFilterChange('featured', !quickFilters.find(f => f.id === filterId)?.active)
+        onFilterChange('featured', !wasActive)
         break
       case 'budget':
-        if (!quickFilters.find(f => f.id === filterId)?.active) {
+        if (!wasActive) {
           onPriceRangeChange(50000, 150000)
+        } else {
+          // Reset para valores padrão quando desativar
+          onPriceRangeChange(50000, 1000000)
         }
         break
       case 'new':
-        if (!quickFilters.find(f => f.id === filterId)?.active) {
+        if (!wasActive) {
           onYearRangeChange(new Date().getFullYear() - 2, new Date().getFullYear())
+        } else {
+          // Reset para valores padrão quando desativar
+          onYearRangeChange(2010, new Date().getFullYear())
         }
         break
     }
