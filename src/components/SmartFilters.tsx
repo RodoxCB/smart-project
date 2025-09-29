@@ -33,7 +33,7 @@ interface SmartFiltersProps {
   filters: Filters
   stats: FilterStats | null
   statsLoading: boolean
-  onFilterChange: (key: string, value: string | boolean) => void
+  onFilterChange: (key: string, value: string | boolean | number) => void
   onPriceRangeChange: (min: number, max: number) => void
   onYearRangeChange: (min: number, max: number) => void
   onMileageRangeChange: (min: number, max: number) => void
