@@ -6,6 +6,7 @@ import Image from "next/image"
 import { Phone, MapPin, Fuel, ArrowLeft, Filter, X } from "lucide-react"
 import RangeSlider from "@/components/RangeSlider"
 import ListingCardSkeleton from "@/components/ListingCardSkeleton"
+import SmartFilters from "@/components/SmartFilters"
 import { useDebounce } from "@/hooks/useDebounce"
 
 interface Listing {
@@ -53,7 +54,6 @@ interface FilterStats {
 export default function ListingsPage() {
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
-  const [showFilters, setShowFilters] = useState(false)
   const [stats, setStats] = useState<FilterStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
   const [filters, setFilters] = useState({
@@ -177,7 +177,7 @@ export default function ListingsPage() {
     fetchListings()
   }, [debouncedFilters, fetchListings])
 
-  const handleFilterChange = (key: string, value: string | boolean) => {
+  const handleFilterChange = (key: string, value: string | boolean | number) => {
     setFilters(prev => ({ ...prev, [key]: value }))
   }
 
@@ -263,237 +263,30 @@ export default function ListingsPage() {
       </header>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
-        {/* Mobile Filter Toggle */}
-        <div className="lg:hidden mb-6">
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="w-full flex items-center justify-center px-4 py-3 bg-white dark:bg-slate-800 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors"
-          >
-            <Filter className="h-5 w-5 mr-2" />
-            {showFilters ? 'Ocultar Filtros' : 'Mostrar Filtros'}
-          </button>
-        </div>
-
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 md:gap-8">
-          {/* Filtros */}
-          <div className={`lg:block ${showFilters ? 'block' : 'hidden lg:block'}`}>
-            <div className="bg-white dark:bg-slate-800 p-4 lg:p-6 rounded-lg shadow-sm border border-gray-200 dark:border-slate-700">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Filtros</h3>
-                <button
-                  onClick={() => setShowFilters(false)}
-                  className="lg:hidden text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
-
-              {/* Busca */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Buscar
-                </label>
-                <input
-                  type="text"
-                  value={filters.search}
-                  onChange={(e) => handleFilterChange('search', e.target.value)}
-                  placeholder="Marca, modelo, localização..."
-                  className="w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 px-3 py-2"
-                />
-              </div>
-
-              {/* Marca */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Marca
-                </label>
-                <select
-                  value={filters.brand}
-                  onChange={(e) => handleFilterChange('brand', e.target.value)}
-                  className="w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 px-3 py-2"
-                >
-                  <option value="">Todas as marcas</option>
-                  <option value="Mercedes-Benz">Mercedes-Benz</option>
-                  <option value="Volvo">Volvo</option>
-                  <option value="Scania">Scania</option>
-                  <option value="MAN">MAN</option>
-                  <option value="Iveco">Iveco</option>
-                  <option value="Marcopolo">Marcopolo</option>
-                  <option value="Caio">Caio</option>
-                  <option value="Busscar">Busscar</option>
-                </select>
-              </div>
-
-              {/* Preço */}
-              <div className="mb-4 lg:mb-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Faixa de Preço
-                </label>
-                {statsLoading ? (
-                  <div className="flex justify-center py-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 dark:border-blue-500"></div>
-                  </div>
-                ) : stats ? (
-                  <div>
-                    <RangeSlider
-                      minValue={stats.priceRange.min}
-                      maxValue={stats.priceRange.max}
-                      currentMin={filters.minPrice}
-                      currentMax={filters.maxPrice}
-                      onChange={handlePriceRangeChange}
-                      formatValue={(value) => new Intl.NumberFormat('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL',
-                      }).format(value)}
-                      step={1000}
-                    />
-                    <div className="text-xs text-gray-500 mt-2">
-                      Valores: min={filters.minPrice}, max={filters.maxPrice}
-                    </div>
-                  </div>
-                ) : (
-                  <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                    Erro ao carregar faixa de preço
-                  </div>
-                )}
-              </div>
-
-              {/* Ano */}
-              <div className="mb-4 lg:mb-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Ano de Fabricação
-                </label>
-                {statsLoading ? (
-                  <div className="flex justify-center py-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 dark:border-blue-500"></div>
-                  </div>
-                ) : stats ? (
-                  <RangeSlider
-                    minValue={stats.yearRange.min}
-                    maxValue={stats.yearRange.max}
-                    currentMin={filters.minYear}
-                    currentMax={filters.maxYear}
-                    onChange={handleYearRangeChange}
-                    step={1}
-                  />
-                ) : (
-                  <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                    Erro ao carregar faixa de ano
-                  </div>
-                )}
-              </div>
-
-              {/* Quilometragem */}
-              <div className="mb-4 lg:mb-6">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                  Quilometragem
-                </label>
-                {statsLoading ? (
-                  <div className="flex justify-center py-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 dark:border-blue-500"></div>
-                  </div>
-                ) : stats ? (
-                  <RangeSlider
-                    minValue={stats.mileageRange.min}
-                    maxValue={stats.mileageRange.max}
-                    currentMin={filters.minMileage}
-                    currentMax={filters.maxMileage}
-                    onChange={handleMileageRangeChange}
-                    formatValue={(value) => `${value.toLocaleString('pt-BR')} km`}
-                    step={5000}
-                  />
-                ) : (
-                  <div className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">
-                    Erro ao carregar faixa de quilometragem
-                  </div>
-                )}
-              </div>
-
-              {/* Combustível */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Combustível
-                </label>
-                <select
-                  value={filters.fuel}
-                  onChange={(e) => handleFilterChange('fuel', e.target.value)}
-                  className="w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 px-3 py-2"
-                >
-                  <option value="">Todos os combustíveis</option>
-                  {stats?.fuels.map((fuel) => (
-                    <option key={fuel} value={fuel}>
-                      {fuel}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Transmissão */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Transmissão
-                </label>
-                <select
-                  value={filters.transmission}
-                  onChange={(e) => handleFilterChange('transmission', e.target.value)}
-                  className="w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 px-3 py-2"
-                >
-                  <option value="">Todas as transmissões</option>
-                  {stats?.transmissions.map((transmission) => (
-                    <option key={transmission} value={transmission}>
-                      {transmission}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Ordenação */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Ordenar por
-                </label>
-                <select
-                  value={`${filters.sortBy}-${filters.sortOrder}`}
-                  onChange={(e) => {
-                    const [sortBy, sortOrder] = e.target.value.split('-')
-                    handleSortChange(sortBy, sortOrder)
-                  }}
-                  className="w-full border border-gray-300 dark:border-slate-600 rounded-md shadow-sm bg-white dark:bg-slate-700 text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 px-3 py-2"
-                >
-                  <option value="createdAt-desc">Mais recentes</option>
-                  <option value="createdAt-asc">Mais antigos</option>
-                  <option value="price-asc">Menor preço</option>
-                  <option value="price-desc">Maior preço</option>
-                  <option value="year-desc">Ano mais recente</option>
-                  <option value="year-asc">Ano mais antigo</option>
-                  <option value="mileage-asc">Menor quilometragem</option>
-                  <option value="mileage-desc">Maior quilometragem</option>
-                </select>
-              </div>
-
-              {/* Destaques */}
-              <div className="mb-4">
-                <label className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={filters.featured}
-                    onChange={(e) => handleFilterChange('featured', e.target.checked)}
-                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 dark:border-slate-600 rounded"
-                  />
-                  <span className="ml-2 text-sm text-gray-700 dark:text-gray-300">Apenas destaques</span>
-                </label>
-              </div>
-
-              {/* Botão Limpar Filtros */}
-              <div className="mb-4">
-                <button
-                  onClick={clearAllFilters}
-                  className="w-full px-4 py-2 bg-gray-100 dark:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-md hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors text-sm font-medium"
-                >
-                  Limpar Todos os Filtros
-                </button>
-              </div>
-            </div>
+          {/* Filtros Inteligentes */}
+          <div className="lg:block">
+            <SmartFilters
+              filters={filters}
+              stats={stats}
+              statsLoading={statsLoading}
+              onFilterChange={handleFilterChange}
+              onPriceRangeChange={handlePriceRangeChange}
+              onYearRangeChange={handleYearRangeChange}
+              onMileageRangeChange={handleMileageRangeChange}
+              onSortChange={handleSortChange}
+              onClearAllFilters={clearAllFilters}
+              activeFiltersCount={
+                (filters.search ? 1 : 0) +
+                (filters.brand ? 1 : 0) +
+                (filters.fuel ? 1 : 0) +
+                (filters.transmission ? 1 : 0) +
+                (filters.featured ? 1 : 0) +
+                (filters.minPrice > (stats?.priceRange.min || 50000) || filters.maxPrice < (stats?.priceRange.max || 1000000) ? 1 : 0) +
+                (filters.minYear > (stats?.yearRange.min || 2010) || filters.maxYear < (stats?.yearRange.max || new Date().getFullYear()) ? 1 : 0) +
+                (filters.minMileage > (stats?.mileageRange.min || 0) || filters.maxMileage < (stats?.mileageRange.max || 500000) ? 1 : 0)
+              }
+            />
           </div>
 
           {/* Lista de Anúncios */}
