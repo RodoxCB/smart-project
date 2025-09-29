@@ -6,6 +6,9 @@ import Link from "next/link"
 import { ArrowLeft, Save, Upload } from "lucide-react"
 import { AdminGuard } from "@/components/AdminGuard"
 
+// Forçar renderização dinâmica para evitar problemas com useSession durante build
+export const dynamic = 'force-dynamic'
+
 interface ListingFormData {
   title: string
   description: string

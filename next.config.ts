@@ -26,6 +26,11 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  // Forçar páginas admin a serem renderizadas dinamicamente
+  // para evitar problemas com useSession durante build estático
+  generateBuildId: async () => {
+    return 'build-cache-key'
+  },
 };
 
 export default nextConfig;

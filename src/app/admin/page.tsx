@@ -6,6 +6,9 @@ import Link from "next/link"
 import { Plus, Edit, Trash2, Eye, ArrowLeft, Menu } from "lucide-react"
 import { AdminGuard } from "@/components/AdminGuard"
 
+// Forçar renderização dinâmica para evitar problemas com useSession durante build
+export const dynamic = 'force-dynamic'
+
 export default function AdminPage() {
   const { data: session } = useSession()
   const [listings, setListings] = useState([])
