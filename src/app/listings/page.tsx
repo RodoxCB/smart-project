@@ -8,7 +8,6 @@ import RangeSlider from "@/components/RangeSlider"
 import ListingCardSkeleton from "@/components/ListingCardSkeleton"
 import SmartFilters from "@/components/SmartFilters"
 import { useDebounce } from "@/hooks/useDebounce"
-// import { useSession } from "next-auth/react"
 
 interface Listing {
   id: string
@@ -53,7 +52,6 @@ interface FilterStats {
 }
 
 export default function ListingsPage() {
-  // const { data: session } = useSession()
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
   const [stats, setStats] = useState<FilterStats | null>(null)
@@ -80,7 +78,6 @@ export default function ListingsPage() {
       if (response.ok) {
         const data = await response.json()
         setStats(data)
-        // Atualizar filtros com os valores reais do banco
         setFilters(prev => ({
           ...prev,
           minPrice: data.priceRange.min,
@@ -99,14 +96,11 @@ export default function ListingsPage() {
   }, [])
 
   const fetchListings = useCallback(async (currentFilters = filters) => {
-    // Evitar múltiplas requisições simultâneas
     if (loading) return
 
     try {
       setLoading(true)
       let url = '/api/listings'
-
-      // Build query params only if filters have values
       const queryParams = []
 
       if (currentFilters.search && currentFilters.search.trim()) {
@@ -118,7 +112,7 @@ export default function ListingsPage() {
       if (currentFilters.minPrice > 0) {
         queryParams.push(`minPrice=${currentFilters.minPrice}`)
       }
-      if (currentFilters.maxPrice < 10000000) { // Valor muito alto para indicar "sem limite superior"
+      if (currentFilters.maxPrice < 10000000) {
         queryParams.push(`maxPrice=${currentFilters.maxPrice}`)
       }
       if (currentFilters.minYear > 0) {
@@ -149,7 +143,6 @@ export default function ListingsPage() {
         queryParams.push('featured=true')
       }
 
-      // Add query params if any exist
       if (queryParams.length > 0) {
         url += '?' + queryParams.join('&')
       }
@@ -166,18 +159,15 @@ export default function ListingsPage() {
     } finally {
       setLoading(false)
     }
-  }, [loading]) // Removida dependência de todos os filtros
+  }, [loading])
 
-  // Load initial data on mount
   useEffect(() => {
     fetchStats()
     fetchListings()
   }, [fetchStats, fetchListings])
 
-  // Debounce dos filtros para evitar múltiplas requisições (tempo aumentado para melhor UX)
   const debouncedFilters = useDebounce(filters, 600)
 
-  // Chamar fetchListings quando os filtros debounced mudarem
   useEffect(() => {
     if (debouncedFilters) {
       fetchListings(debouncedFilters)
@@ -189,7 +179,6 @@ export default function ListingsPage() {
   }
 
   const handlePriceRangeChange = (min: number, max: number) => {
-    console.log('Price range change:', { min, max })
     setFilters(prev => ({
       ...prev,
       minPrice: min,
@@ -254,7 +243,6 @@ export default function ListingsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
-      {/* Header */}
       <header className="bg-white dark:bg-slate-800 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4 md:py-6">
@@ -271,7 +259,6 @@ export default function ListingsPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 md:gap-8">
-          {/* Filtros Inteligentes */}
           <div className="lg:block">
             <SmartFilters
               filters={filters}
@@ -296,9 +283,7 @@ export default function ListingsPage() {
             />
           </div>
 
-          {/* Lista de Anúncios */}
           <div className="col-span-1 lg:col-span-3">
-            {/* Contador de Resultados */}
             <div className="mb-4 lg:mb-6">
               <div className="flex items-center justify-between">
                 <div className="text-sm text-gray-600 dark:text-gray-400">
@@ -318,7 +303,6 @@ export default function ListingsPage() {
                     </span>
                   )}
                 </div>
-                {/* Espaço para futuros controles de paginação */}
               </div>
             </div>
 
@@ -337,7 +321,6 @@ export default function ListingsPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
                 {listings.map((listing) => (
                   <div key={listing.id} className="bg-white dark:bg-slate-800 rounded-lg shadow-md dark:shadow-slate-900/50 overflow-hidden hover:shadow-lg dark:hover:shadow-slate-900/70 transition-shadow border border-gray-200 dark:border-slate-700">
-                    {/* Imagem */}
                     <div className="relative">
                       {listing.images[0] ? (
                         <Image
@@ -359,7 +342,6 @@ export default function ListingsPage() {
                       )}
                     </div>
 
-                    {/* Conteúdo */}
                     <div className="p-4">
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
                         {listing.title}
