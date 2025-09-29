@@ -1,14 +1,17 @@
-"use client"
-
-import { useState, useEffect, useCallback } from "react"
-import Link from "next/link"
-import Image from "next/image"
-import { Phone, MapPin, Fuel, ArrowLeft, Filter, X } from "lucide-react"
-import RangeSlider from "@/components/RangeSlider"
-import ListingCardSkeleton from "@/components/ListingCardSkeleton"
-import SmartFilters from "@/components/SmartFilters"
-import { useDebounce } from "@/hooks/useDebounce"
-// import { useSession } from "next-auth/react"
+export default function ListingsPage() {
+  return (
+    <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">
+          Anúncios de Ônibus
+        </h1>
+        <p className="text-gray-600 dark:text-gray-300">
+          Página de listagens funcionando! Os dados aparecerão aqui em breve.
+        </p>
+      </div>
+    </div>
+  )
+}
 
 interface Listing {
   id: string
