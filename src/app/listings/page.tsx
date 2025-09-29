@@ -184,18 +184,23 @@ function ListingsPageContent() {
 
   // Load initial data on mount
   useEffect(() => {
-    fetchStats()
-    setLoading(true)
-    fetchListings()
-  }, [fetchStats, fetchListings])
+    const loadInitialData = async () => {
+      setLoading(true)
+      await fetchStats()
+      await fetchListings()
+    }
+    loadInitialData()
+  }, [])
 
   // Debounce dos filtros para evitar múltiplas requisições
   const debouncedFilters = useDebounce(filters, 300)
 
   useEffect(() => {
-    setLoading(true)
-    fetchListings()
-  }, [debouncedFilters, fetchListings])
+    if (debouncedFilters !== filters) {
+      setLoading(true)
+      fetchListings()
+    }
+  }, [debouncedFilters])
 
   const handleFilterChange = (key: string, value: string | boolean) => {
     setFilters(prev => ({ ...prev, [key]: value }))
