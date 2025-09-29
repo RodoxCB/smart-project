@@ -103,6 +103,7 @@ function ListingsPageContent() {
   const fetchListings = async () => {
     try {
       setLoading(true)
+      console.log('Starting fetchListings...')
       let url = '/api/listings'
 
       // Build query params only if filters have values
@@ -153,10 +154,13 @@ function ListingsPageContent() {
         url += '?' + queryParams.join('&')
       }
 
+      console.log('Fetching from URL:', url)
       const response = await fetch(url)
+      console.log('Response status:', response.status)
       if (response.ok) {
         const data = await response.json()
-        setListings(data.listings)
+        console.log('Received data:', data)
+        setListings(data.listings || [])
         setError(null)
       } else {
         console.error('Erro na resposta da API:', response.status, response.statusText)
@@ -166,6 +170,7 @@ function ListingsPageContent() {
       console.error('Erro ao buscar anúncios:', error)
       setError('Erro de conexão. Tente novamente mais tarde.')
     } finally {
+      console.log('Setting loading to false')
       setLoading(false)
     }
   }
