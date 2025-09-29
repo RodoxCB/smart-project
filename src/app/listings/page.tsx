@@ -67,7 +67,7 @@ function ListingsPageContent() {
     loadData()
   }, [])
 
-  console.log('Component rendering with listings:', listings.length, 'loading:', loading)
+  console.log('Component rendering with listings:', listings.length, 'filtered:', filteredListings.length, 'loading:', loading)
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat('pt-BR', {
@@ -83,12 +83,7 @@ function ListingsPageContent() {
     window.open(url, '_blank')
   }
 
-  const filteredListings = listings.filter(listing =>
-    listing.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    listing.brand.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    listing.model.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (listing.location && listing.location.toLowerCase().includes(searchTerm.toLowerCase()))
-  )
+  const filteredListings = listings // Temporarily remove filtering to debug
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
