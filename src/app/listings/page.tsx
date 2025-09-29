@@ -59,9 +59,9 @@ export default function ListingsPage() {
   const [showFilters, setShowFilters] = useState(false)
   const [stats, setStats] = useState<FilterStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
-  const [filters, setFilters] = useState(() => ({
-    search: searchParams?.get('search') || '',
-    brand: searchParams?.get('brand') || '',
+  const [filters, setFilters] = useState({
+    search: '',
+    brand: '',
     minPrice: 50000,
     maxPrice: 1000000,
     minYear: 2010,
@@ -73,7 +73,7 @@ export default function ListingsPage() {
     sortBy: 'createdAt',
     sortOrder: 'desc',
     featured: false,
-  }))
+  })
 
   const fetchStats = useCallback(async () => {
     try {
@@ -167,6 +167,18 @@ export default function ListingsPage() {
       setLoading(false)
     }
   }, [filters.search, filters.brand, filters.minPrice, filters.maxPrice, filters.minYear, filters.maxYear, filters.minMileage, filters.maxMileage, filters.fuel, filters.transmission, filters.sortBy, filters.sortOrder, filters.featured])
+
+  // Initialize filters with URL parameters
+  useEffect(() => {
+    const urlSearch = searchParams?.get('search') || ''
+    const urlBrand = searchParams?.get('brand') || ''
+
+    setFilters(prev => ({
+      ...prev,
+      search: urlSearch,
+      brand: urlBrand,
+    }))
+  }, [])
 
   // Load initial data on mount
   useEffect(() => {
