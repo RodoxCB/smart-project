@@ -46,16 +46,16 @@ export async function GET(request: NextRequest) {
 
     if (search) {
       where.OR = [
-        { title: { contains: search, mode: 'insensitive' } },
-        { description: { contains: search, mode: 'insensitive' } },
-        { brand: { contains: search, mode: 'insensitive' } },
-        { model: { contains: search, mode: 'insensitive' } },
-        { location: { contains: search, mode: 'insensitive' } },
+        { title: { contains: search } },
+        { description: { contains: search } },
+        { brand: { contains: search } },
+        { model: { contains: search } },
+        { location: { contains: search } },
       ]
     }
 
     if (brand) {
-      where.brand = { contains: brand, mode: 'insensitive' }
+      where.brand = { contains: brand }
     }
 
     if (minPrice) {
@@ -83,11 +83,11 @@ export async function GET(request: NextRequest) {
     }
 
     if (fuel) {
-      where.fuel = { contains: fuel, mode: 'insensitive' }
+      where.fuel = { contains: fuel }
     }
 
     if (transmission) {
-      where.transmission = { contains: transmission, mode: 'insensitive' }
+      where.transmission = { contains: transmission }
     }
 
     if (featured) {

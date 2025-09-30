@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from "react"
 import { useSearchParams, useRouter } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
-import { Search, Filter, SlidersHorizontal, X, MapPin, Fuel, Settings, Users, Calendar, ArrowUpDown, Star, Heart, ChevronDown, Loader2, MessageCircle, Gauge } from "lucide-react"
+import { Search, Filter, SlidersHorizontal, X, MapPin, Fuel, Settings, Users, Calendar, ArrowUpDown, Star, Heart, ChevronDown, Loader2, MessageCircle, Gauge, ArrowLeft } from "lucide-react"
 import { useDebounce } from "@/hooks/useDebounce"
 
 interface Listing {
@@ -52,8 +52,8 @@ function ListingsPageContent() {
   // Estados de filtros
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedBrand, setSelectedBrand] = useState('')
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 1000000])
-  const [yearRange, setYearRange] = useState<[number, number]>([2010, new Date().getFullYear()])
+  const [priceRange, setPriceRange] = useState<[number, number]>([0, 999999999]) // Valores iniciais altos para não filtrar
+  const [yearRange, setYearRange] = useState<[number, number]>([0, 9999]) // Valores iniciais amplos para não filtrar
   const [selectedFuel, setSelectedFuel] = useState('')
   const [selectedTransmission, setSelectedTransmission] = useState('')
   const [sortBy, setSortBy] = useState<SortOption>('createdAt-desc')
@@ -75,9 +75,7 @@ function ListingsPageContent() {
       if (response.ok) {
         const data = await response.json()
         setStats(data)
-        // Inicializar ranges com dados reais
-        setPriceRange([data.priceRange.min, data.priceRange.max])
-        setYearRange([data.yearRange.min, data.yearRange.max])
+        // Não inicializar ranges automaticamente - deixar o usuário controlar
       }
     } catch (error) {
       console.error('Erro ao buscar estatísticas:', error)
@@ -90,21 +88,21 @@ function ListingsPageContent() {
       setLoading(true)
       setError(null)
 
-      const params = new URLSearchParams({
-        page: page.toString(),
-        limit: '12',
-        ...(debouncedSearchTerm && { search: debouncedSearchTerm }),
-        ...(selectedBrand && { brand: selectedBrand }),
-        ...(priceRange[0] > 0 && { minPrice: priceRange[0].toString() }),
-        ...(priceRange[1] < 10000000 && { maxPrice: priceRange[1].toString() }),
-        ...(yearRange[0] > 0 && { minYear: yearRange[0].toString() }),
-        ...(yearRange[1] < 9999 && { maxYear: yearRange[1].toString() }),
-        ...(selectedFuel && { fuel: selectedFuel }),
-        ...(selectedTransmission && { transmission: selectedTransmission }),
-        ...(showFeaturedOnly && { featured: 'true' }),
-        sortBy: sortBy.split('-')[0],
-        sortOrder: sortBy.split('-')[1]
-      })
+          const params = new URLSearchParams({
+            page: page.toString(),
+            limit: '12',
+            ...(debouncedSearchTerm && { search: debouncedSearchTerm }),
+            ...(selectedBrand && { brand: selectedBrand }),
+            ...(priceRange[0] > 0 && { minPrice: priceRange[0].toString() }),
+            ...(priceRange[1] < 999999999 && { maxPrice: priceRange[1].toString() }),
+            ...(yearRange[0] > 0 && { minYear: yearRange[0].toString() }),
+            ...(yearRange[1] < 9999 && { maxYear: yearRange[1].toString() }),
+            ...(selectedFuel && { fuel: selectedFuel }),
+            ...(selectedTransmission && { transmission: selectedTransmission }),
+            ...(showFeaturedOnly && { featured: 'true' }),
+            sortBy: sortBy.split('-')[0],
+            sortOrder: sortBy.split('-')[1]
+          })
 
       const response = await fetch(`/api/listings?${params}`)
       if (response.ok) {
@@ -150,8 +148,8 @@ function ListingsPageContent() {
     setSelectedFuel('')
     setSelectedTransmission('')
     setShowFeaturedOnly(false)
-    setPriceRange([stats?.priceRange.min || 0, stats?.priceRange.max || 1000000])
-    setYearRange([stats?.yearRange.min || 2010, stats?.yearRange.max || new Date().getFullYear()])
+    setPriceRange([0, 999999999]) // Reset para valores iniciais (sem filtro)
+    setYearRange([0, 9999]) // Reset para valores iniciais (sem filtro)
     setCurrentPage(1)
   }
 
@@ -517,6 +515,7 @@ function ListingsPageContent() {
                           fill
                           className="object-cover group-hover:scale-105 transition-transform duration-300"
                           sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                          unoptimized
                         />
                       ) : (
                         <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 dark:from-slate-600 dark:to-slate-700 flex items-center justify-center">
